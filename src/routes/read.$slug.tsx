@@ -5,9 +5,13 @@ import { Shell } from "@/components/shell";
 import { SymbolTex } from "@/components/symbol-tex";
 import { SequenceStudio } from "@/components/sequence-studio";
 import { Def } from "@/components/def";
+import { SymText } from "@/components/sym-text";
+import { LessonBar, LessonLauncher, ListenButton } from "@/components/lesson-player";
 import { chapterBySlug, chapters, neighbors } from "@/data";
 import { levelLabel, volumeTitle } from "@/data/types";
 import { useProgress } from "@/lib/progress";
+import { formulaSpeech } from "@/lib/speech/lesson";
+import { useLesson } from "@/lib/speech/lesson-store";
 import { useTitle } from "@/lib/use-title";
 
 export const Route = createFileRoute("/read/$slug")({
@@ -18,6 +22,7 @@ function Reader() {
   const { slug } = Route.useParams();
   const chapter = chapterBySlug.get(slug);
   const visit = useProgress((state) => state.visit);
+  const lessonOpen = useLesson((state) => state.slug === slug && state.segments.length > 0);
   useTitle(chapter?.title ?? "Chapter not found");
 
   useEffect(() => {
@@ -43,13 +48,16 @@ function Reader() {
 
   return (
     <Shell active={slug}>
-      <article className="mx-auto max-w-2xl">
+      <article className={"mx-auto max-w-2xl " + (lessonOpen ? "pb-56" : "")}>
         <p className="text-sm text-muted">
           {volumeTitle(chapter.volume)} · {levelLabel[chapter.level]} · {chapter.minutes} min ·{" "}
           Chapter {index + 1} of {chapters.length}
         </p>
-        <h1 className="mt-2 font-serif text-4xl leading-tight">{chapter.title}</h1>
-        <p className="mt-4 font-serif text-lg leading-relaxed">{chapter.summary}</p>
+        <div data-lesson="lesson-intro">
+          <h1 className="mt-2 font-serif text-4xl leading-tight">{chapter.title}</h1>
+          <p className="mt-4 font-serif text-lg leading-relaxed">{chapter.summary}</p>
+        </div>
+        <LessonLauncher chapter={chapter} />
         <p className="mt-4 text-sm">
           <Link to="/calculators" className="text-accent">
             Open the calculators
@@ -77,8 +85,12 @@ function Reader() {
 
         <h2 className="mt-10 font-serif text-2xl">The idea</h2>
         <div className="mt-3 flex flex-col gap-4">
-          {chapter.body.map((paragraph) => (
-            <p key={paragraph.slice(0, 48)} className="font-serif text-lg leading-relaxed">
+          {chapter.body.map((paragraph, i) => (
+            <p
+              key={paragraph.slice(0, 48)}
+              data-lesson={`lesson-body-${i}`}
+              className="font-serif text-lg leading-relaxed"
+            >
               {paragraph}
             </p>
           ))}
@@ -86,8 +98,10 @@ function Reader() {
 
         <h2 className="mt-10 font-serif text-2xl">Hold onto this</h2>
         <ol className="mt-3 flex list-decimal flex-col gap-2 pl-5 font-serif text-lg leading-relaxed">
-          {chapter.ideas.map((idea) => (
-            <li key={idea}>{idea}</li>
+          {chapter.ideas.map((idea, i) => (
+            <li key={idea} data-lesson={`lesson-idea-${i}`}>
+              {idea}
+            </li>
           ))}
         </ol>
 
@@ -95,21 +109,34 @@ function Reader() {
 
         <h2 className="mt-10 font-serif text-2xl">Formulas</h2>
         <p className="mt-2 text-sm leading-relaxed text-muted">
-          Hover or focus a symbol in an equation. The note says what that letter stands for in this
+          Hover or focus an equation to see what it says and what each variable means. Hover a
+          single symbol for just that symbol. The note says what a letter stands for in this
           formula, not in every formula. V is volume in one chapter and not velocity in another.
         </p>
         <div className="mt-4 flex flex-col gap-4">
-          {chapter.formulas.map((formula) => (
+          {chapter.formulas.map((formula, formulaIndex) => (
             <section
               key={formula.id}
               id={formula.id}
               className="scroll-mt-20 rounded-lg border border-line bg-card p-4"
             >
-              <h3 className="text-sm font-medium tracking-wide text-accent uppercase">
-                {formula.name}
-              </h3>
-              <div className="mt-3 text-ink">
-                <SymbolTex tex={formula.tex} symbols={formula.symbols} display />
+              <div className="-mt-2 -mr-2 flex items-center justify-between gap-2">
+                <h3 className="text-sm font-medium tracking-wide text-accent uppercase">
+                  {formula.name}
+                </h3>
+                <ListenButton
+                  id={`${slug}:${formula.id}`}
+                  text={formulaSpeech(formula, formulaIndex + 1)}
+                  label={formula.name}
+                />
+              </div>
+              <div className="mt-1 text-ink">
+                <SymbolTex
+                  tex={formula.tex}
+                  symbols={formula.symbols}
+                  summary={{ name: formula.name, meaning: formula.meaning }}
+                  display
+                />
               </div>
               <p className="mt-3 font-serif leading-relaxed">{formula.meaning}</p>
               <dl className="mt-3 flex flex-col gap-1">
@@ -119,7 +146,7 @@ function Reader() {
                     className="flex flex-col gap-1 text-sm sm:flex-row sm:gap-4"
                   >
                     <dt className="shrink-0 text-muted sm:w-40">
-                      <Def term={symbol.sym} definition={symbol.means} />
+                      <Def term={<SymText text={symbol.sym} />} definition={symbol.means} />
                     </dt>
                     <dd>{symbol.means}</dd>
                   </div>
@@ -133,16 +160,23 @@ function Reader() {
         <div className="mt-4 flex flex-col gap-6">
           {chapter.examples.map((example, exampleIndex) => (
             <section key={example.title}>
-              <h3 className="font-serif text-xl">
-                {exampleIndex + 1}. {example.title}
-              </h3>
-              <p className="mt-2 font-serif leading-relaxed">{example.prompt}</p>
+              <div data-lesson={`lesson-example-${exampleIndex}`}>
+                <h3 className="font-serif text-xl">
+                  {exampleIndex + 1}. {example.title}
+                </h3>
+                <p className="mt-2 font-serif leading-relaxed">{example.prompt}</p>
+              </div>
               <ol className="mt-3 flex list-decimal flex-col gap-2 pl-5 text-sm leading-relaxed">
-                {example.steps.map((step) => (
-                  <li key={step}>{step}</li>
+                {example.steps.map((step, stepIndex) => (
+                  <li key={step} data-lesson={`lesson-example-${exampleIndex}-step-${stepIndex}`}>
+                    {step}
+                  </li>
                 ))}
               </ol>
-              <p className="mt-3 border-l-2 border-accent pl-3 font-serif leading-relaxed">
+              <p
+                data-lesson={`lesson-example-${exampleIndex}-answer`}
+                className="mt-3 border-l-2 border-accent pl-3 font-serif leading-relaxed"
+              >
                 {example.answer}
               </p>
             </section>
@@ -151,19 +185,23 @@ function Reader() {
 
         <h2 className="mt-10 font-serif text-2xl">Try these</h2>
         <div className="mt-4 flex flex-col gap-4">
-          {chapter.practice.map((item) => (
-            <Practice key={item.q} question={item.q} answer={item.a} />
+          {chapter.practice.map((item, i) => (
+            <Practice key={item.q} index={i} slug={slug} question={item.q} answer={item.a} />
           ))}
         </div>
 
         <h2 className="mt-10 font-serif text-2xl">Common mistakes</h2>
         <ul className="mt-3 flex list-disc flex-col gap-2 pl-5 font-serif leading-relaxed">
-          {chapter.pitfalls.map((pitfall) => (
-            <li key={pitfall}>{pitfall}</li>
+          {chapter.pitfalls.map((pitfall, i) => (
+            <li key={pitfall} data-lesson={`lesson-pitfall-${i}`}>
+              {pitfall}
+            </li>
           ))}
         </ul>
 
-        <MarkRead slug={slug} />
+        <div data-lesson="lesson-outro">
+          <MarkRead slug={slug} />
+        </div>
 
         <nav className="mt-10 flex flex-col gap-3 border-t border-line pt-6 sm:flex-row sm:justify-between">
           {prev ? (
@@ -190,14 +228,28 @@ function Reader() {
           ) : null}
         </nav>
       </article>
+      <LessonBar slug={slug} />
     </Shell>
   );
 }
 
-function Practice({ question, answer }: { question: string; answer: string }) {
-  const [open, setOpen] = useState(false);
+function Practice({
+  index,
+  slug,
+  question,
+  answer,
+}: {
+  index: number;
+  slug: string;
+  question: string;
+  answer: string;
+}) {
+  const [toggled, setToggled] = useState(false);
+  const revealed = useLesson((state) => state.slug === slug && state.revealed.includes(index));
+  const open = toggled || revealed;
+  const setOpen = (fn: (value: boolean) => boolean) => setToggled(fn(open));
   return (
-    <div className="rounded-lg border border-line p-4">
+    <div data-lesson={`lesson-practice-${index}`} className="rounded-lg border border-line p-4">
       <p className="font-serif leading-relaxed">{question}</p>
       <button
         type="button"

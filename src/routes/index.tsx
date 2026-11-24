@@ -143,7 +143,7 @@ function Home() {
         ) : (
           <>
             <section className="mt-10">
-              <h2 className="font-serif text-2xl">Four ways through</h2>
+              <h2 className="font-serif text-2xl">Five ways through</h2>
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
                 {paths.map((path) => {
                   const first = path.slugs[0];

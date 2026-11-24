@@ -14,7 +14,7 @@
     "build": "tsc --noEmit && vite build && node scripts/static-routes.mjs",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "test": "node --experimental-strip-types --no-warnings tests/calc-check.ts",
+    "test": "node --experimental-strip-types --no-warnings tests/calc-check.ts && node --experimental-strip-types --no-warnings tests/content-check.ts",
     "lint": "eslint .",
     "format": "prettier --write ."
   },

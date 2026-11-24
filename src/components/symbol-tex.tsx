@@ -1,121 +1,46 @@
 import katex from "katex";
-import { useLayoutEffect, useRef, useState, type FocusEvent, type PointerEvent } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type FocusEvent,
+  type PointerEvent,
+} from "react";
 import "katex/dist/katex.min.css";
 
-export type SymbolGloss = { sym: string; means: string };
+import { SymText } from "@/components/sym-text";
+import { annotateSymbols, type SymbolGloss } from "@/lib/symbols";
 
-const SUB: Record<string, string> = {
-  "₀": "0",
-  "₁": "1",
-  "₂": "2",
-  "₃": "3",
-  "₄": "4",
-  "₅": "5",
-  "₆": "6",
-  "₇": "7",
-  "₈": "8",
-  "₉": "9",
-  "⁰": "0",
-  "¹": "1",
-  "²": "2",
-  "³": "3",
-  "⁴": "4",
-  "⁵": "5",
-  "⁶": "6",
-  "⁷": "7",
-  "⁸": "8",
-  "⁹": "9",
-  "₊": "+",
-  "⁺": "+",
-  "₋": "-",
-  "⁻": "-",
-  "−": "-",
-};
+export type { SymbolGloss };
 
-/** Compare a typeset atom with the symbol as written in the chapter. */
-export function symbolKey(raw: string): string {
-  let out = "";
-  for (const ch of raw) {
-    if (SUB[ch]) out += SUB[ch];
-    else if (ch === "_" || ch === " " || ch === "{" || ch === "}" || ch === "$") continue;
-    else out += ch;
-  }
-  return out;
-}
+export type FormulaSummary = { name: string; meaning: string };
 
-function glossMap(symbols: SymbolGloss[]): Map<string, string> {
-  const map = new Map<string, string>();
-  for (const symbol of symbols) {
-    const parts = symbol.sym
-      .split(/[,;]/)
-      .map((part) => part.trim())
-      .filter(Boolean);
-    for (const part of parts) {
-      const key = symbolKey(part);
-      if (!key || map.has(key)) continue;
-      map.set(key, `${part} — ${symbol.means}`);
-    }
-  }
-  return map;
-}
+type Tip =
+  | { kind: "symbol"; text: string; left: number; top: number }
+  | { kind: "formula"; left: number; top: number; bottom: number };
 
-function collapsed(el: Element): string {
-  return (el.textContent ?? "").replace(/\s|\u200b|\u200c|\u200d|\ufeff/g, "");
-}
+const TIP_WIDTH = 256;
+const SUMMARY_WIDTH = 320;
 
-function isLetter(ch: string): boolean {
-  return /\p{L}/u.test(ch);
-}
-
-/** Mark KaTeX atoms whose text is a symbol from this formula. Idempotent. */
-export function annotateSymbols(root: HTMLElement, symbols: SymbolGloss[]) {
-  const map = glossMap(symbols);
-  if (map.size === 0) return;
-  const atoms = [...root.querySelectorAll(".mord")].filter((el) => !el.closest("[data-def]"));
-  const claimed = new Set<Element>();
-
-  const ranked = atoms
-    .map((el) => ({ el, key: symbolKey(collapsed(el)) }))
-    .filter((item) => item.key.length > 0)
-    .sort((a, b) => b.key.length - a.key.length);
-
-  for (const item of ranked) {
-    if (claimed.has(item.el)) continue;
-    const means = map.get(item.key);
-    if (!means) continue;
-    if ([...item.el.querySelectorAll(".mord")].some((child) => claimed.has(child))) continue;
-    item.el.setAttribute("data-def", means);
-    item.el.classList.add("sym-def");
-    claimed.add(item.el);
-    item.el.querySelectorAll(".mord").forEach((child) => claimed.add(child));
-  }
-
-  for (const el of atoms) {
-    if (claimed.has(el) || el.querySelector(".mord") || el.querySelector(".sym-def")) continue;
-    const text = collapsed(el);
-    if (text.length < 2 || ![...text].every((ch) => isLetter(ch) && map.has(ch))) continue;
-    el.textContent = "";
-    for (const ch of text) {
-      const span = document.createElement("span");
-      span.textContent = ch;
-      span.dataset.def = map.get(ch) ?? "";
-      span.className = "sym-def";
-      el.appendChild(span);
-    }
-  }
-}
-
+/**
+ * A typeset formula. Hovering or focusing a symbol says what it stands for.
+ * With `summary`, hovering or focusing anywhere else on the formula describes
+ * the whole formula and lists its variables.
+ */
 export function SymbolTex({
   tex,
   symbols,
   display = false,
+  summary,
 }: {
   tex: string;
   symbols: SymbolGloss[];
   display?: boolean;
+  summary?: FormulaSummary;
 }) {
   const root = useRef<HTMLDivElement>(null);
-  const [tip, setTip] = useState<{ text: string; left: number; top: number } | null>(null);
+  const [tip, setTip] = useState<Tip | null>(null);
   const html = katex.renderToString(tex, {
     throwOnError: false,
     displayMode: display,
@@ -127,40 +52,108 @@ export function SymbolTex({
     if (root.current) annotateSymbols(root.current, symbols);
   }, [html, symbols]);
 
+  // A fixed tooltip would drift away from its formula on scroll; close it.
+  useEffect(() => {
+    if (!tip) return;
+    const close = () => setTip(null);
+    window.addEventListener("scroll", close, { passive: true, capture: true });
+    window.addEventListener("resize", close);
+    return () => {
+      window.removeEventListener("scroll", close, { capture: true });
+      window.removeEventListener("resize", close);
+    };
+  }, [tip]);
+
   function show(target: EventTarget | null) {
-    const el = target instanceof Element ? target.closest<HTMLElement>("[data-def]") : null;
-    if (!el || !root.current?.contains(el)) return;
-    const rect = el.getBoundingClientRect();
-    const width = 256;
-    const left = Math.max(8, Math.min(rect.left, window.innerWidth - width - 8));
-    setTip({ text: el.dataset.def ?? "", left, top: rect.bottom + 6 });
+    if (!root.current || !(target instanceof Element) || !root.current.contains(target)) return;
+    const el = target.closest<HTMLElement>("[data-def]");
+    if (el && root.current.contains(el)) {
+      const rect = el.getBoundingClientRect();
+      const left = Math.max(8, Math.min(rect.left, window.innerWidth - TIP_WIDTH - 8));
+      setTip({ kind: "symbol", text: el.dataset.def ?? "", left, top: rect.bottom + 6 });
+      return;
+    }
+    if (!summary) {
+      setTip(null);
+      return;
+    }
+    const box = (root.current.querySelector(".katex") ?? root.current).getBoundingClientRect();
+    const width = Math.min(SUMMARY_WIDTH, window.innerWidth - 16);
+    const left = Math.max(8, Math.min(box.left, window.innerWidth - width - 8));
+    setTip({ kind: "formula", left, top: box.bottom + 6, bottom: box.top - 6 });
   }
 
   function hide(event: PointerEvent | FocusEvent) {
     const next = event.relatedTarget;
-    if (next instanceof Element && next.closest("[data-def]")) return;
+    if (next instanceof Element && root.current?.contains(next)) return;
     setTip(null);
   }
+
+  // Open upward when the formula sits low in the window.
+  const flip = tip?.kind === "formula" && tip.top > window.innerHeight * 0.6;
 
   return (
     <div
       ref={root}
       className={display ? "formula-display overflow-x-auto" : undefined}
+      tabIndex={summary ? 0 : undefined}
+      aria-label={summary ? `${summary.name}. ${summary.meaning}` : undefined}
       onPointerOver={(event) => show(event.target)}
       onPointerOut={hide}
       onFocus={(event) => show(event.target)}
       onBlur={hide}
     >
       <div dangerouslySetInnerHTML={{ __html: html }} />
-      {tip ? (
+      {tip?.kind === "symbol" ? (
         <span
           role="tooltip"
           className="fixed z-50 w-64 rounded-lg border border-line bg-card px-3 py-2 text-left text-xs leading-relaxed text-ink shadow-sm"
           style={{ left: tip.left, top: tip.top }}
         >
-          {tip.text}
+          <TipText text={tip.text} />
+        </span>
+      ) : null}
+      {tip?.kind === "formula" && summary ? (
+        <span
+          role="tooltip"
+          className="fixed z-50 flex max-h-[50vh] flex-col gap-2 overflow-y-auto rounded-lg border border-line bg-card px-3 py-2 text-left text-xs leading-relaxed text-ink shadow-sm"
+          style={{
+            left: tip.left,
+            width: Math.min(SUMMARY_WIDTH, window.innerWidth - 16),
+            ...(flip ? { bottom: window.innerHeight - tip.bottom } : { top: tip.top }),
+          }}
+        >
+          <span className="font-medium text-accent">{summary.name}</span>
+          <span>{summary.meaning}</span>
+          {symbols.length > 0 ? (
+            <span className="flex flex-col gap-0.5 border-t border-line pt-2">
+              {symbols.map((symbol) => (
+                <span key={symbol.sym}>
+                  <span className="font-medium">
+                    <SymText text={symbol.sym} />
+                  </span>
+                  <span className="text-muted"> — </span>
+                  {symbol.means}
+                </span>
+              ))}
+            </span>
+          ) : null}
         </span>
       ) : null}
     </div>
+  );
+}
+
+/** "x_i — The i-th observation", with the symbol typeset. */
+function TipText({ text }: { text: string }) {
+  const cut = text.indexOf(" — ");
+  if (cut < 0) return <>{text}</>;
+  return (
+    <>
+      <span className="font-medium">
+        <SymText text={text.slice(0, cut)} />
+      </span>
+      {text.slice(cut)}
+    </>
   );
 }

@@ -86,7 +86,12 @@ function Atlas() {
                       {formula.name}
                     </Link>
                     <div className="mt-2">
-                      <SymbolTex tex={formula.tex} symbols={formula.symbols} display />
+                      <SymbolTex
+                        tex={formula.tex}
+                        symbols={formula.symbols}
+                        summary={{ name: formula.name, meaning: formula.meaning }}
+                        display
+                      />
                     </div>
                     <p className="mt-2 text-sm leading-relaxed">{formula.meaning}</p>
                   </li>

@@ -1,7 +1,7 @@
-import { useId, useState } from "react";
+import { useId, useState, type ReactNode } from "react";
 
 /** A term that explains itself on hover, focus, or tap. */
-export function Def({ term, definition }: { term: string; definition: string }) {
+export function Def({ term, definition }: { term: ReactNode; definition: string }) {
   const [open, setOpen] = useState(false);
   const id = useId();
 

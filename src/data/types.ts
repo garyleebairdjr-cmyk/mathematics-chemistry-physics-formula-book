@@ -1,4 +1,4 @@
-export type VolumeId = "mathematics" | "physics" | "chemistry" | "biology";
+export type VolumeId = "mathematics" | "statistics" | "physics" | "chemistry" | "biology";
 
 export type Level = "foundational" | "intermediate" | "advanced" | "frontier";
 
@@ -58,6 +58,11 @@ export const volumes: {
     id: "mathematics",
     title: "Mathematics",
     lede: "From counting and shape to proof, structure, and the frontier.",
+  },
+  {
+    id: "statistics",
+    title: "Statistics",
+    lede: "Describing data, drawing inferences, building models, and spotting the errors that mislead.",
   },
   {
     id: "physics",

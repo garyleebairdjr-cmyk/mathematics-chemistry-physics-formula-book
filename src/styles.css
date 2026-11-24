@@ -122,3 +122,13 @@ button.sym-def {
   transform: translateY(-1px);
   box-shadow: 0 6px 20px -12px color-mix(in srgb, var(--color-ink) 45%, transparent);
 }
+
+/* What the guided lesson is reading right now. */
+.lesson-current {
+  border-radius: 0.5rem;
+  background: var(--color-accent-soft);
+  box-shadow: 0 0 0 6px var(--color-accent-soft);
+  transition:
+    background-color 200ms ease,
+    box-shadow 200ms ease;
+}

@@ -4,12 +4,12 @@ import { higher } from "./math-higher.ts";
 import { sciences } from "./sciences.ts";
 import { lawsChapter } from "./laws.ts";
 import { sequencesChapter } from "./sequences.ts";
+import { statistics } from "./statistics.ts";
 
 const pool = new Map<string, Chapter>(
-  [...foundations, ...higher, ...sciences, sequencesChapter, lawsChapter].map((chapter) => [
-    chapter.slug,
-    chapter,
-  ]),
+  [...foundations, ...higher, ...statistics, ...sciences, sequencesChapter, lawsChapter].map(
+    (chapter) => [chapter.slug, chapter],
+  ),
 );
 
 const order = [
@@ -33,6 +33,10 @@ const order = [
   "abstract-algebra",
   "topology",
   "frontier",
+  "descriptive-statistics",
+  "statistical-inference",
+  "statistical-modeling",
+  "statistical-pitfalls",
   "mechanics",
   "energy-waves",
   "electromagnetism",
@@ -93,6 +97,17 @@ export const paths: { title: string; blurb: string; slugs: string[] }[] = [
       "abstract-algebra",
       "topology",
       "frontier",
+    ],
+  },
+  {
+    title: "Statistics",
+    blurb: "Summaries, inference, models, and the mistakes to look for in every number.",
+    slugs: [
+      "probability",
+      "descriptive-statistics",
+      "statistical-inference",
+      "statistical-modeling",
+      "statistical-pitfalls",
     ],
   },
   {
