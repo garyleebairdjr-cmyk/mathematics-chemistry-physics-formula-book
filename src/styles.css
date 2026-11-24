@@ -1,0 +1,124 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Outfit", "Avenir Next", "Segoe UI", sans-serif;
+  --font-serif: "Literata", "Iowan Old Style", Palatino, "Palatino Linotype", serif;
+  --color-paper: #f4efe6;
+  --color-ink: #1c1915;
+  --color-muted: #6f675e;
+  --color-line: #e4d9cb;
+  --color-card: #fbf8f2;
+  --color-accent: #8f3d2c;
+  --color-accent-soft: #f6ebe4;
+  --color-on-accent: #fbf8f2;
+  --radius-lg: 0.75rem;
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Dark theme: same tokens, warm "lamplight" palette. */
+.dark {
+  --color-paper: #16130f;
+  --color-ink: #ece5da;
+  --color-muted: #a59a8c;
+  --color-line: #332c24;
+  --color-card: #1f1b16;
+  --color-accent: #e08a6f;
+  --color-accent-soft: #3a2620;
+  --color-on-accent: #16130f;
+  color-scheme: dark;
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    scroll-padding-top: 4.5rem;
+    background: var(--color-paper);
+    color: var(--color-ink);
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background: var(--color-paper);
+    color: var(--color-ink);
+    min-height: 100vh;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.katex {
+  color: inherit;
+  font-size: 1.05em;
+}
+
+.formula-display .katex {
+  font-size: 1.2em;
+}
+
+.sym-def {
+  cursor: help;
+  text-decoration-line: underline;
+  text-decoration-style: dotted;
+  text-decoration-color: var(--color-accent);
+  text-underline-offset: 0.15em;
+}
+
+button.sym-def {
+  font: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+}
+
+.sym-def:focus {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: var(--color-accent-soft);
+  color: var(--color-ink);
+}
+
+/* Cards and links get a gentle lift on hover. */
+.lift {
+  transition:
+    border-color 150ms ease,
+    transform 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.lift:hover {
+  border-color: var(--color-accent);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px -12px color-mix(in srgb, var(--color-ink) 45%, transparent);
+}
