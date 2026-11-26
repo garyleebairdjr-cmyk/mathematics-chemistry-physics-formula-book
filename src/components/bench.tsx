@@ -34,7 +34,9 @@ export function Bench() {
   return (
     <div>
       <p className="text-sm font-medium tracking-wide text-accent uppercase">Instruments</p>
-      <h1 className="mt-2 font-serif text-4xl leading-tight">Calculators</h1>
+      <h1 className="mt-2 font-display text-4xl font-semibold tracking-tight sm:text-5xl">
+        Calculators
+      </h1>
       <p className="mt-4 max-w-2xl font-serif text-lg leading-relaxed">
         Compute the formulas in the book. Hover a symbol — v, V, T, n — to read what it stands for
         in that calculator. The same letter is not the same quantity everywhere. Physics and
@@ -135,7 +137,7 @@ function ToolView({ tool }: { tool: Tool }) {
 
   return (
     <section>
-      <h2 className="font-serif text-3xl leading-tight">{tool.title}</h2>
+      <h2 className="font-display text-3xl font-semibold leading-tight">{tool.title}</h2>
       <p className="mt-2 font-serif text-lg">{tool.formula}</p>
       <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted">{tool.blurb}</p>
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
@@ -182,7 +184,7 @@ function ToolView({ tool }: { tool: Tool }) {
         })}
       </div>
 
-      <div className="mt-6 rounded-lg border border-line bg-card p-4">
+      <div className="mt-6 panel p-4">
         {"error" in result ? (
           <p className="font-serif leading-relaxed">{result.error}</p>
         ) : (
@@ -306,17 +308,17 @@ function Converter() {
         Swap units
       </button>
 
-      <div className="mt-4 rounded-lg border border-line bg-card p-4">
+      <div className="mt-4 panel p-4">
         {parsed === null ? (
           <p className="font-serif">Enter a number to convert.</p>
         ) : (
-          <p className="font-serif text-2xl leading-snug">
+          <p className="font-display text-2xl font-semibold leading-snug">
             {fmt(parsed)} {from.symbol} = {fmt(converted ?? 0)} {to.symbol}
           </p>
         )}
       </div>
 
-      <h2 className="mt-8 font-serif text-2xl">The same amount, in every unit</h2>
+      <h2 className="mt-8 font-display text-2xl font-semibold">The same amount, in every unit</h2>
       <ul className="mt-3 divide-y divide-line border-y border-line">
         {quantity.units.map((unit) => {
           const amount = si === null ? null : unit.fromSI(si);
@@ -337,7 +339,7 @@ function Converter() {
         })}
       </ul>
 
-      <h2 className="mt-10 font-serif text-2xl">Constants the calculators use</h2>
+      <h2 className="mt-10 font-display text-2xl font-semibold">Constants the calculators use</h2>
       <p className="mt-2 text-sm leading-relaxed text-muted">
         Defined constants are exact. G is the measured value these tools use, not a definition.
       </p>
@@ -392,7 +394,7 @@ function UnitSide({
         readOnly={readOnly}
         onChange={onValue ? (event) => onValue(event.target.value) : undefined}
         inputMode="decimal"
-        className="h-11 w-full bg-transparent font-serif text-2xl outline-none"
+        className="h-11 w-full bg-transparent font-display text-2xl font-semibold outline-none"
       />
       <label className="mt-2 block" htmlFor={`${id}-unit`}>
         <span className="sr-only">{legend} unit</span>

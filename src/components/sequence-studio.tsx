@@ -64,8 +64,8 @@ export function SequenceStudio() {
   const spiral = kind === "fibonacci" ? fibonacciSpiral(Math.min(count, 8)) : [];
 
   return (
-    <section className="mt-8 rounded-lg border border-line bg-card p-4">
-      <h2 className="font-serif text-2xl">A model you can move</h2>
+    <section className="mt-8 panel p-4">
+      <h2 className="font-display text-2xl font-semibold">A model you can move</h2>
       <p className="mt-2 text-sm leading-relaxed text-muted">
         Change the rule and the length. The bars are the terms, unless you ask for the running sum.
         Hover a marked word if the letter is doing silent work.

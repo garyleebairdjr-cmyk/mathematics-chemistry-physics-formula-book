@@ -1,7 +1,7 @@
 {
   "name": "mathematics-chemistry-physics-formula-book",
   "version": "1.0.0",
-  "description": "An open, free field book of mathematics from arithmetic to the frontier, with the formulas of physics, chemistry, and biology — plus interactive calculators.",
+  "description": "An open, free field book of mathematics from arithmetic to the frontier, with the formulas of physics, chemistry, and biology \u2014 plus interactive calculators.",
   "license": "MIT",
   "private": true,
   "type": "module",
@@ -16,7 +16,8 @@
     "typecheck": "tsc --noEmit",
     "test": "node --experimental-strip-types --no-warnings tests/calc-check.ts && node --experimental-strip-types --no-warnings tests/content-check.ts",
     "lint": "eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "voices": "uv run scripts/voice-server.py"
   },
   "dependencies": {
     "@tanstack/react-router": "^1.170.0",

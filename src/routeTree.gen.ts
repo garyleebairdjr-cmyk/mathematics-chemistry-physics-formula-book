@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AtlasRouteImport } from './routes/atlas'
 import { Route as CalculatorsRouteImport } from './routes/calculators'
+import { Route as LabRouteImport } from './routes/lab'
 import { Route as ReadSlugRouteImport } from './routes/read.$slug'
 
 const IndexRoute = IndexRouteImport.update({
@@ -29,6 +30,11 @@ const CalculatorsRoute = CalculatorsRouteImport.update({
   path: '/calculators',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LabRoute = LabRouteImport.update({
+  id: '/lab',
+  path: '/lab',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ReadSlugRoute = ReadSlugRouteImport.update({
   id: '/read/$slug',
   path: '/read/$slug',
@@ -39,12 +45,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/atlas': typeof AtlasRoute
   '/calculators': typeof CalculatorsRoute
+  '/lab': typeof LabRoute
   '/read/$slug': typeof ReadSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/atlas': typeof AtlasRoute
   '/calculators': typeof CalculatorsRoute
+  '/lab': typeof LabRoute
   '/read/$slug': typeof ReadSlugRoute
 }
 export interface FileRoutesById {
@@ -52,20 +60,22 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/atlas': typeof AtlasRoute
   '/calculators': typeof CalculatorsRoute
+  '/lab': typeof LabRoute
   '/read/$slug': typeof ReadSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/atlas' | '/calculators' | '/read/$slug'
+  fullPaths: '/' | '/atlas' | '/calculators' | '/lab' | '/read/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/atlas' | '/calculators' | '/read/$slug'
-  id: '__root__' | '/' | '/atlas' | '/calculators' | '/read/$slug'
+  to: '/' | '/atlas' | '/calculators' | '/lab' | '/read/$slug'
+  id: '__root__' | '/' | '/atlas' | '/calculators' | '/lab' | '/read/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AtlasRoute: typeof AtlasRoute
   CalculatorsRoute: typeof CalculatorsRoute
+  LabRoute: typeof LabRoute
   ReadSlugRoute: typeof ReadSlugRoute
 }
 
@@ -92,6 +102,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CalculatorsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lab': {
+      id: '/lab'
+      path: '/lab'
+      fullPath: '/lab'
+      preLoaderRoute: typeof LabRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/read/$slug': {
       id: '/read/$slug'
       path: '/read/$slug'
@@ -106,6 +123,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AtlasRoute: AtlasRoute,
   CalculatorsRoute: CalculatorsRoute,
+  LabRoute: LabRoute,
   ReadSlugRoute: ReadSlugRoute,
 }
 export const routeTree = rootRouteImport

@@ -12,8 +12,8 @@ export function SearchField({
   label: string;
 }) {
   return (
-    <label className="mt-6 flex min-h-11 items-center gap-2 rounded-lg border border-line bg-card px-3">
-      <Search className="size-4 shrink-0 text-muted" />
+    <label className="mt-10 flex min-h-12 items-center gap-3 rounded-full border border-line bg-card/70 px-4 focus-within:border-accent">
+      <Search className="size-4 shrink-0 text-accent" />
       <span className="sr-only">{label}</span>
       <input
         type="search"

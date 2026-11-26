@@ -38,7 +38,9 @@ function Atlas() {
     <Shell>
       <div className="mx-auto max-w-3xl">
         <p className="text-sm font-medium tracking-wide text-accent uppercase">Reference</p>
-        <h1 className="mt-2 font-serif text-4xl">Formula atlas</h1>
+        <h1 className="mt-2 font-display text-4xl font-semibold tracking-tight sm:text-5xl">
+          Formula atlas
+        </h1>
         <p className="mt-3 font-serif text-lg leading-relaxed">
           Every formula in the book, with the sentence that says what it is for. Open one to see the
           symbols, the worked example, and the mistakes around it.
@@ -53,7 +55,7 @@ function Atlas() {
         <p className="mt-2 text-sm text-muted">{shown} formulas</p>
 
         <section className="mt-8">
-          <h2 className="font-serif text-2xl">Constants used in this book</h2>
+          <h2 className="font-display text-2xl font-semibold">Constants used in this book</h2>
           <dl className="mt-3 grid gap-px overflow-hidden rounded-lg border border-line bg-line sm:grid-cols-2">
             {constants.map((item) => (
               <div key={item.symbol} className="bg-card px-4 py-3">
@@ -68,7 +70,7 @@ function Atlas() {
         <div className="mt-10 flex flex-col gap-10">
           {groups.map(({ chapter, formulas }) => (
             <section key={chapter.slug}>
-              <h2 className="font-serif text-2xl">
+              <h2 className="font-display text-2xl font-semibold">
                 <Link to="/read/$slug" params={{ slug: chapter.slug }}>
                   {chapter.title}
                 </Link>
@@ -76,7 +78,7 @@ function Atlas() {
               <p className="text-sm text-muted">{volumeTitle(chapter.volume)}</p>
               <ul className="mt-3 flex flex-col gap-3">
                 {formulas.map((formula) => (
-                  <li key={formula.id} className="rounded-lg border border-line bg-card p-4">
+                  <li key={formula.id} className="panel p-4">
                     <Link
                       to="/read/$slug"
                       params={{ slug: chapter.slug }}

@@ -8,8 +8,7 @@
       name="description"
       content="A free field book of mathematics from arithmetic to the frontier, with the formulas of physics, chemistry, and biology, worked examples, and interactive calculators."
     />
-    <meta name="theme-color" content="#f4efe6" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#16130f" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#07080d" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Mathematics, Chemistry & Physics Formula Book" />
     <meta
@@ -26,16 +25,33 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,420;0,7..72,650;1,7..72,420&family=Outfit:wght@420;520;640&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=Space+Grotesk:wght@500;600;700&display=swap"
     />
     <script>
-      // Apply the saved or system color theme before first paint (no flash).
-      try {
-        var t = localStorage.getItem("formula-book-theme");
-        if (t === "dark" || (!t && matchMedia("(prefers-color-scheme: dark)").matches)) {
-          document.documentElement.classList.add("dark");
-        }
-      } catch (e) {}
+      // Apply the saved (or system) theme and accent before first paint, so there is no flash.
+      (function () {
+        var pref = "system";
+        var ink = "amber";
+        try {
+          var raw = localStorage.getItem("formula-book-appearance");
+          var saved = raw ? (JSON.parse(raw) || {}).state || {} : null;
+          if (saved) {
+            if (saved.theme === "light" || saved.theme === "dark" || saved.theme === "system") pref = saved.theme;
+            if (["amber", "sky", "sage", "violet"].indexOf(saved.ink) >= 0) ink = saved.ink;
+          } else {
+            var old = localStorage.getItem("formula-book-theme");
+            if (old === "light" || old === "dark") pref = old;
+          }
+        } catch (e) {}
+        var dark = pref === "system" ? matchMedia("(prefers-color-scheme: dark)").matches : pref === "dark";
+        var root = document.documentElement;
+        root.setAttribute("data-theme", dark ? "dark" : "light");
+        root.setAttribute("data-ink", ink);
+        root.style.colorScheme = dark ? "dark" : "light";
+        if (dark) root.classList.add("dark");
+        var meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.setAttribute("content", dark ? "#07080d" : "#f4f5f9");
+      })();
     </script>
   </head>
   <body>

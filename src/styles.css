@@ -1,38 +1,116 @@
 @import "tailwindcss";
 
-@theme {
-  --font-sans: "Outfit", "Avenir Next", "Segoe UI", sans-serif;
+/*
+ * Design tokens. Every component uses these names, so the theme (light/dark)
+ * and the accent (Solar, Cyan, Mint, Violet) restyle the whole book.
+ * index.html sets data-theme and data-ink on <html> before first paint.
+ */
+@theme static {
+  --font-sans: "Inter", "Segoe UI", system-ui, sans-serif;
+  --font-display: "Space Grotesk", "Inter", "Segoe UI", sans-serif;
   --font-serif: "Literata", "Iowan Old Style", Palatino, "Palatino Linotype", serif;
-  --color-paper: #f4efe6;
-  --color-ink: #1c1915;
-  --color-muted: #6f675e;
-  --color-line: #e4d9cb;
-  --color-card: #fbf8f2;
-  --color-accent: #8f3d2c;
-  --color-accent-soft: #f6ebe4;
-  --color-on-accent: #fbf8f2;
+  --font-flair: "Instrument Serif", "Literata", Georgia, serif;
+
+  --color-paper: #f4f5f9;
+  --color-card: #ffffff;
+  --color-raise: #e9ebf2;
+  --color-ink: #0c0e14;
+  --color-muted: #4a5064;
+  --color-line: #d5d9e3;
+  --color-track: #7b8194;
+
+  --color-accent: #9a4800;
+  --color-accent-hover: #7f3b00;
+  --color-accent-soft: #fdeedd;
+  --color-on-accent: #fff8f1;
+  --color-glow: #ff5f8f;
+
+  /* Subject hues, used for small marks only (chips, rings, dots). */
+  --color-math: #6633d1;
+  --color-stats: #b0367a;
+  --color-physics: #075f9e;
+  --color-chemistry: #066b45;
+  --color-biology: #8a5a00;
+
   --radius-lg: 0.75rem;
+  --radius-xl: 1.1rem;
+  --radius-2xl: 1.5rem;
 }
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* Dark theme: same tokens, warm "lamplight" palette. */
-.dark {
-  --color-paper: #16130f;
-  --color-ink: #ece5da;
-  --color-muted: #a59a8c;
-  --color-line: #332c24;
-  --color-card: #1f1b16;
-  --color-accent: #e08a6f;
-  --color-accent-soft: #3a2620;
-  --color-on-accent: #16130f;
+:root[data-theme="dark"] {
+  --color-paper: #07080d;
+  --color-card: #10121a;
+  --color-raise: #191c27;
+  --color-ink: #f4f5f8;
+  --color-muted: #9ba1b5;
+  --color-line: #272b3a;
+  --color-track: #6b7186;
+
+  --color-math: #b69cff;
+  --color-stats: #ff8ac6;
+  --color-physics: #5cd3ff;
+  --color-chemistry: #4ee6a6;
+  --color-biology: #ffc56e;
   color-scheme: dark;
+}
+
+/* Accents: `accent` is for text and fills; `glow` only decorates (gradients, the aurora). */
+:root[data-ink="sky"] {
+  --color-accent: #075f9e;
+  --color-accent-hover: #054d82;
+  --color-accent-soft: #e0effb;
+  --color-on-accent: #f4f9ff;
+  --color-glow: #6d5cff;
+}
+:root[data-ink="sage"] {
+  --color-accent: #066b45;
+  --color-accent-hover: #045a39;
+  --color-accent-soft: #dcf4e9;
+  --color-on-accent: #f0fbf6;
+  --color-glow: #00a3c4;
+}
+:root[data-ink="violet"] {
+  --color-accent: #6633d1;
+  --color-accent-hover: #5528b4;
+  --color-accent-soft: #ece6fd;
+  --color-on-accent: #f8f5ff;
+  --color-glow: #e0459e;
+}
+:root[data-theme="dark"] {
+  --color-accent: #ffb547;
+  --color-accent-hover: #ffc56e;
+  --color-accent-soft: #33240c;
+  --color-on-accent: #1a0f00;
+  --color-glow: #ff5f8f;
+}
+:root[data-theme="dark"][data-ink="sky"] {
+  --color-accent: #5cd3ff;
+  --color-accent-hover: #85dfff;
+  --color-accent-soft: #0c2a38;
+  --color-on-accent: #001820;
+  --color-glow: #7c6cff;
+}
+:root[data-theme="dark"][data-ink="sage"] {
+  --color-accent: #4ee6a6;
+  --color-accent-hover: #78edbd;
+  --color-accent-soft: #0c2f22;
+  --color-on-accent: #00190f;
+  --color-glow: #36c8ff;
+}
+:root[data-theme="dark"][data-ink="violet"] {
+  --color-accent: #b69cff;
+  --color-accent-hover: #c9b6ff;
+  --color-accent-soft: #241b44;
+  --color-on-accent: #12082e;
+  --color-glow: #ff7ad9;
 }
 
 @layer base {
   html {
     -webkit-font-smoothing: antialiased;
-    scroll-padding-top: 4.5rem;
+    scroll-padding-top: 5rem;
     background: var(--color-paper);
     color: var(--color-ink);
   }
@@ -63,6 +141,172 @@
     outline: 2px solid var(--color-accent);
     outline-offset: 2px;
   }
+
+  input[type="range"] {
+    accent-color: var(--color-accent);
+  }
+}
+
+/* --- Backdrop: an aurora in the accent hues over faint graph paper. -------- */
+
+.backdrop {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.backdrop::before {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  background:
+    radial-gradient(
+      42% 38% at 12% 4%,
+      color-mix(in srgb, var(--color-accent) 22%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      36% 34% at 92% 10%,
+      color-mix(in srgb, var(--color-glow) 18%, transparent),
+      transparent 72%
+    ),
+    radial-gradient(
+      40% 40% at 70% 100%,
+      color-mix(in srgb, var(--color-glow) 9%, transparent),
+      transparent 70%
+    );
+  filter: blur(10px);
+  animation: aurora 28s ease-in-out infinite alternate;
+}
+
+:root:not([data-theme="dark"]) .backdrop::before {
+  opacity: 0.55;
+}
+
+.backdrop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(
+      to right,
+      color-mix(in srgb, var(--color-ink) 5%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--color-ink) 5%, transparent) 1px,
+      transparent 1px
+    );
+  background-size: 32px 32px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 30%, transparent 85%);
+}
+
+@keyframes aurora {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  100% {
+    transform: translate3d(-3%, 4%, 0) scale(1.08);
+  }
+}
+
+/* Surfaces that float over the backdrop. */
+.glass {
+  background: color-mix(in srgb, var(--color-card) 78%, transparent);
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+}
+
+.panel {
+  border: 1px solid var(--color-line);
+  background: color-mix(in srgb, var(--color-card) 88%, transparent);
+  border-radius: var(--radius-xl);
+}
+
+/* Gradient text and fills from the accent to its glow. */
+.text-gradient {
+  background: linear-gradient(100deg, var(--color-accent), var(--color-glow));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.bg-gradient {
+  background: linear-gradient(100deg, var(--color-accent), var(--color-glow));
+}
+
+/* The primary action: a lit button. */
+.btn-primary {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  padding: 0 1.1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-on-accent);
+  background: var(--color-accent);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--color-accent) 60%, transparent),
+    0 8px 28px -10px color-mix(in srgb, var(--color-accent) 80%, transparent);
+  transition:
+    transform 150ms ease,
+    box-shadow 150ms ease,
+    background-color 150ms ease;
+}
+
+.btn-primary:hover {
+  background: var(--color-accent-hover);
+  transform: translateY(-1px);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--color-accent) 70%, transparent),
+    0 12px 32px -10px color-mix(in srgb, var(--color-glow) 70%, transparent);
+}
+
+.btn-ghost {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  padding: 0 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: 1px solid var(--color-line);
+  background: color-mix(in srgb, var(--color-card) 70%, transparent);
+  color: var(--color-ink);
+  transition:
+    border-color 150ms ease,
+    background-color 150ms ease;
+}
+
+.btn-ghost:hover {
+  border-color: color-mix(in srgb, var(--color-accent) 60%, var(--color-line));
+  background: var(--color-card);
+}
+
+/* Small rounded labels. */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-line);
+  padding: 0.15rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-muted);
+  background: color-mix(in srgb, var(--color-card) 60%, transparent);
+}
+
+.mono {
+  font-family: ui-monospace, "JetBrains Mono", "SFMono-Regular", Menlo, monospace;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -76,13 +320,19 @@
   }
 }
 
+/* --- Math ------------------------------------------------------------------ */
+
 .katex {
   color: inherit;
   font-size: 1.05em;
 }
 
 .formula-display .katex {
-  font-size: 1.2em;
+  font-size: 1.25em;
+}
+
+.formula-hero .katex {
+  font-size: 1.6em;
 }
 
 .sym-def {
@@ -109,26 +359,176 @@ button.sym-def {
   color: var(--color-ink);
 }
 
-/* Cards and links get a gentle lift on hover. */
+/* Cards get a gentle lift and a lit edge on hover. */
 .lift {
   transition:
-    border-color 150ms ease,
-    transform 150ms ease,
-    box-shadow 150ms ease;
+    border-color 180ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease;
 }
 
 .lift:hover {
-  border-color: var(--color-accent);
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px -12px color-mix(in srgb, var(--color-ink) 45%, transparent);
+  border-color: color-mix(in srgb, var(--color-accent) 55%, var(--color-line));
+  transform: translateY(-2px);
+  box-shadow: 0 14px 40px -22px color-mix(in srgb, var(--color-accent) 70%, transparent);
 }
 
-/* What the guided lesson is reading right now. */
+/* A formula card. The top edge lights up while it is being read. */
+.formula-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.formula-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-accent),
+    var(--color-glow),
+    transparent
+  );
+  opacity: 0.5;
+}
+
+/* --- Read-along ------------------------------------------------------------ */
+
+/* The block the guided lesson is reading right now. */
 .lesson-current {
-  border-radius: 0.5rem;
-  background: var(--color-accent-soft);
-  box-shadow: 0 0 0 6px var(--color-accent-soft);
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--color-accent-soft) 70%, transparent);
+  box-shadow: 0 0 0 8px color-mix(in srgb, var(--color-accent-soft) 70%, transparent);
   transition:
     background-color 200ms ease,
     box-shadow 200ms ease;
+}
+
+/* Sentences inside the text. Tap one to read from there. */
+.say {
+  border-radius: 0.3rem;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  transition:
+    background-color 180ms ease,
+    color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.reading .say {
+  cursor: pointer;
+}
+
+.reading .say:hover {
+  background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+}
+
+.say[data-state="said"] {
+  color: color-mix(in srgb, var(--color-ink) 55%, transparent);
+}
+
+.say[data-state="now"] {
+  background: color-mix(in srgb, var(--color-accent) 20%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-accent) 45%, transparent);
+  color: var(--color-ink);
+}
+
+/* Big play button with a breathing halo while speaking. */
+.play-orb {
+  position: relative;
+  border-radius: 999px;
+  background: radial-gradient(
+    circle at 35% 30%,
+    var(--color-accent-hover),
+    var(--color-accent) 60%
+  );
+  color: var(--color-on-accent);
+  box-shadow:
+    0 0 0 6px color-mix(in srgb, var(--color-accent) 16%, transparent),
+    0 10px 40px -6px color-mix(in srgb, var(--color-glow) 60%, transparent);
+  transition: transform 150ms ease;
+}
+
+.play-orb:hover {
+  transform: scale(1.04);
+}
+
+.play-orb[data-live="true"]::after {
+  content: "";
+  position: absolute;
+  inset: -10px;
+  border-radius: inherit;
+  border: 2px solid color-mix(in srgb, var(--color-accent) 50%, transparent);
+  animation: halo 1.8s ease-out infinite;
+}
+
+@keyframes halo {
+  0% {
+    transform: scale(0.92);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1.25);
+    opacity: 0;
+  }
+}
+
+/* Floating formulas on the home page. */
+.drift {
+  animation: drift 18s ease-in-out infinite alternate;
+}
+
+@keyframes drift {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(-2deg);
+  }
+  100% {
+    transform: translate3d(0, -18px, 0) rotate(2deg);
+  }
+}
+
+.fade-up {
+  animation: fade-up 500ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Thin scrollbars for side rails. */
+.thin-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line) transparent;
+}
+
+/* The symbol the voice is explaining, lit inside its formula. */
+.sym-live {
+  color: var(--color-accent);
+  text-shadow: 0 0 18px color-mix(in srgb, var(--color-glow) 70%, transparent);
+  transition: color 180ms ease;
+}
+
+/* The settings drawer slides in from the right. */
+.slide-in {
+  animation: slide-in 260ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@keyframes slide-in {
+  from {
+    transform: translateX(24px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
 }

@@ -5,6 +5,9 @@ import { chunkText } from "../src/lib/speech/engine.ts";
 import { buildLesson, formulaSpeech } from "../src/lib/speech/lesson.ts";
 import { texToSpeech, textToSpeech } from "../src/lib/speech/tex-speech.ts";
 import { symbolKey } from "../src/lib/symbols.ts";
+import { splitSentences } from "../src/lib/speech/sentences.ts";
+import { compile } from "../src/lib/plot/expr.ts";
+import { presets } from "../src/lib/plot/presets.ts";
 
 let failed = 0;
 let checks = 0;
@@ -202,6 +205,102 @@ check("x̄ matches \\bar{x}", symbolKey("x̄") === "xˉ");
 check("ȳ matches \\bar{y}", symbolKey("ȳ") === "yˉ");
 check("p̂ matches \\hat{p}", symbolKey("p̂") === "p^");
 check("μ_0 matches \\mu_0", symbolKey("μ_0") === "μ0");
+
+// --- Read-along -----------------------------------------------------------
+
+{
+  const split = splitSentences(
+    "Weight near Earth is mg, with g about 9.81 m/s² downward. The normal force is not automatically mg. Use e.g. a ruler. Done!",
+  );
+  check("sentences: split at full stops", split.length === 4, split);
+  check("sentences: decimals stay whole", split[0]?.includes("9.81 m/s²"), split);
+  check(
+    "sentences: e.g. does not end a sentence",
+    split[2] === "Use e.g. a ruler.",
+    split,
+  );
+}
+
+for (const chapter of chapters) {
+  const lesson = buildLesson(chapter);
+  for (const segment of lesson) {
+    // Sentence parts must line up with what the page splits, so highlights match.
+    const byTarget = new Map<string, string[]>();
+    for (const part of segment.parts) {
+      if (part.kind !== "text" || part.target === undefined) continue;
+      check(
+        `${chapter.slug}/${segment.anchor}: sentence part has an index`,
+        part.say !== undefined,
+      );
+      const list = byTarget.get(part.target) ?? [];
+      list.push(part.text);
+      byTarget.set(part.target, list);
+    }
+    for (const [target, pieces] of byTarget) {
+      check(
+        `${chapter.slug}/${target}: sentence parts are numbered in order`,
+        segment.parts
+          .filter((part) => part.target === target)
+          .every((part, i) => part.say === i || part.kind === "symbol"),
+      );
+      check(
+        `${chapter.slug}/${target}: no empty sentences`,
+        pieces.every((piece) => piece.trim().length > 0),
+      );
+    }
+    check(
+      `${chapter.slug}/${segment.anchor}: every part says something`,
+      segment.parts.every((part) => part.speech.trim().length > 0),
+      segment.parts.filter((part) => !part.speech.trim()),
+    );
+  }
+}
+
+// --- Graph lab expressions --------------------------------------------------
+
+{
+  const at = (src: string, x: number, extra: Record<string, number> = {}) =>
+    compile(src, ["x", "a", "b", "c"])({ x, a: 2, b: 3, c: 0, ...extra });
+  const close = (a: number, b: number) => Math.abs(a - b) < 1e-9;
+  check("expr: precedence", close(at("1 + 2*3^2", 0), 19));
+  check("expr: unary minus binds below powers", close(at("-x^2", 3), -9));
+  check("expr: implicit products", close(at("2x + 3(x + 1)", 1), 8));
+  check("expr: parameters", close(at("a*sin(b*x) + c", Math.PI / 6), 2));
+  check("expr: constants", close(at("pi", 0), Math.PI) && close(at("e", 0), Math.E));
+  check("expr: joined names", close(at("ax", 5), 10));
+  check("expr: functions without brackets", close(at("2sin x", Math.PI / 2), 2));
+  check("expr: unicode operators", close(at("x² − 2·x", 3), 3));
+  let threw = false;
+  try {
+    compile("x + (", ["x"]);
+  } catch {
+    threw = true;
+  }
+  check("expr: bad input is reported", threw);
+  let unknown = "";
+  try {
+    compile("zz + 1", ["x"]);
+  } catch (error) {
+    unknown = String(error);
+  }
+  check("expr: unknown names are named", unknown.includes("zz"), unknown);
+}
+
+for (const preset of presets) {
+  const params = Object.fromEntries(preset.params.map((param) => [param.id, param.value]));
+  const view = preset.view(params);
+  check(`lab ${preset.id}: chapter exists`, chapterBySlug.has(preset.chapter));
+  check(`lab ${preset.id}: view is a real window`, view.x[1] > view.x[0] && view.y[1] > view.y[0]);
+  check(
+    `lab ${preset.id}: formula typesets`,
+    !katex.renderToString(preset.tex, { throwOnError: false }).includes("katex-error"),
+  );
+  for (const readout of preset.readouts?.(params) ?? [])
+    check(
+      `lab ${preset.id}: readout ${readout.label} has a value`,
+      readout.value !== "—" && readout.value !== "NaN",
+    );
+}
 
 if (failed > 0) {
   console.error(`${failed} of ${checks} content checks failed`);

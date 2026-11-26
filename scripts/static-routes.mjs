@@ -9,7 +9,7 @@ const index = join(dist, "index.html");
 const order = readFileSync("src/data/index.ts", "utf8").match(/const order = \[([\s\S]*?)\];/);
 if (!order) throw new Error("Could not find the chapter order in src/data/index.ts");
 const slugs = [...order[1].matchAll(/"([^"]+)"/g)].map((m) => m[1]);
-const routes = ["atlas", "calculators", ...slugs.map((slug) => `read/${slug}`)];
+const routes = ["atlas", "calculators", "lab", ...slugs.map((slug) => `read/${slug}`)];
 
 for (const route of routes) {
   mkdirSync(join(dist, route), { recursive: true });

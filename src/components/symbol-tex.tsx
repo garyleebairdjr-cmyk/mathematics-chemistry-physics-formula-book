@@ -33,11 +33,16 @@ export function SymbolTex({
   symbols,
   display = false,
   summary,
+  live,
+  className,
 }: {
   tex: string;
   symbols: SymbolGloss[];
   display?: boolean;
   summary?: FormulaSummary;
+  /** Light up the atoms of the symbol with this meaning (the one being explained aloud). */
+  live?: string;
+  className?: string;
 }) {
   const root = useRef<HTMLDivElement>(null);
   const [tip, setTip] = useState<Tip | null>(null);
@@ -51,6 +56,15 @@ export function SymbolTex({
   useLayoutEffect(() => {
     if (root.current) annotateSymbols(root.current, symbols);
   }, [html, symbols]);
+
+  useLayoutEffect(() => {
+    const el = root.current;
+    if (!el) return;
+    const suffix = live ? ` — ${live}` : null;
+    for (const atom of el.querySelectorAll<HTMLElement>("[data-def]")) {
+      atom.classList.toggle("sym-live", !!suffix && (atom.dataset.def ?? "").endsWith(suffix));
+    }
+  }, [html, symbols, live]);
 
   // A fixed tooltip would drift away from its formula on scroll; close it.
   useEffect(() => {
@@ -95,7 +109,10 @@ export function SymbolTex({
   return (
     <div
       ref={root}
-      className={display ? "formula-display overflow-x-auto" : undefined}
+      className={
+        [display ? "formula-display overflow-x-auto" : "", className ?? ""].join(" ").trim() ||
+        undefined
+      }
       tabIndex={summary ? 0 : undefined}
       aria-label={summary ? `${summary.name}. ${summary.meaning}` : undefined}
       onPointerOver={(event) => show(event.target)}

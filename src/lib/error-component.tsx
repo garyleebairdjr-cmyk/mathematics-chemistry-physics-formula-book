@@ -15,7 +15,7 @@ export function AppErrorComponent({ error }: ErrorComponentProps) {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-3 bg-paper px-6 text-center text-ink">
       <TriangleAlert className="size-10 text-accent" strokeWidth={2} aria-hidden />
-      <h1 className="font-serif text-2xl">Something went wrong</h1>
+      <h1 className="font-display text-2xl font-semibold">Something went wrong</h1>
       <p className="max-w-md text-sm break-words text-muted">{errorMessage(error)}</p>
       <a href={import.meta.env.BASE_URL} className="mt-2 text-sm font-medium text-accent">
         Back to the library
@@ -30,7 +30,9 @@ export function NotFound() {
     <Shell>
       <div className="mx-auto max-w-2xl">
         <p className="text-sm font-medium tracking-wide text-accent uppercase">404</p>
-        <h1 className="mt-2 font-serif text-4xl">This page is not in the book.</h1>
+        <h1 className="mt-2 font-display text-4xl font-semibold tracking-tight sm:text-5xl">
+          This page is not in the book.
+        </h1>
         <Link to="/" className="mt-4 inline-flex min-h-11 items-center text-accent">
           Back to the library
         </Link>

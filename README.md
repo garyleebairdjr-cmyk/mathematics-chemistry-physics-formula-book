@@ -27,9 +27,11 @@
 | **34 chapters** | 20 of mathematics in the order it is actually learned, 4 of statistics, then physics, chemistry, and biology |
 | **239 formulas** | Typeset with KaTeX — hover a formula for what it says and its variables, or a symbol for what it means *in that formula* |
 | **203 worked examples** | Step-by-step, with the answer called out |
-| **84 practice problems** | Hidden solutions you can reveal when ready |
+| **84 practice problems** | Hidden solutions, and a "Got it / Not yet" self-check that fills each chapter's mastery ring |
 | **114 calculators** | Math (28), physics (61), chemistry (20), biology (5), plus a unit converter |
-| **Guided lessons** | A voice reads each chapter, explains every formula, walks through the examples, and quizzes you |
+| **Read-along lessons** | A voice reads each chapter sentence by sentence as it lights up, explains every formula symbol by symbol, walks through the examples, and quizzes you |
+| **Natural voices** | Ten neural voice characters, run in the browser (no install) or by a small local voice server |
+| **Graph lab** | 11 live models (tangents, Riemann sums, Taylor series, the normal curve, projectiles, oscillators, beats, logistic growth…) plus your own functions |
 | **Formula atlas** | Every formula in one searchable page, with the physical constants used |
 
 **Mathematics** — Arithmetic · Algebra · Geometry · Trigonometry · Functions, exponentials & logarithms ·
@@ -50,9 +52,13 @@ electrochemistry
 
 ## Screenshots
 
-| Library | Chapter (dark theme) |
+| Library (dark) | Chapter (light) |
 |---|---|
-| ![Library home page](docs/screenshots/home.png) | ![A chapter in dark mode](docs/screenshots/chapter-dark.png) |
+| ![Library home page in the dark theme, with progress, streak, and floating formulas](docs/screenshots/home.png) | ![The differential calculus chapter in the light theme](docs/screenshots/chapter.png) |
+| **Read-along in a chapter** | **Focus mode** |
+| ![A lesson reading a formula card: spoken sentences fade, the current one is outlined](docs/screenshots/chapter-dark.png) | ![Focus mode: the voice visualizer, the formula with the symbol being explained lit, and the playback controls](docs/screenshots/focus-mode.png) |
+| **Graph lab** | **Voice settings** |
+| ![The graph lab showing the secant, tangent, and derivative of x³ − 3x](docs/screenshots/lab.png) | ![The settings drawer: install steps for local voices and the voice characters](docs/screenshots/settings-voices.png) |
 | **Calculators** | **Phone** |
 | ![Calculators](docs/screenshots/calc.png) | <img src="docs/screenshots/mobile-home.png" alt="Home page on a phone" width="260" /> |
 
@@ -71,6 +77,12 @@ Nothing to install and no account needed — just [open the book](https://garyle
   each practice question and waits until you choose *Show answer*. Pick a narrator voice, a second
   voice for the questions, and a speed. Every formula also has a *Listen* button. Voices come from
   your browser and operating system (the Web Speech API), so the choice varies by device.
+- **Natural voices.** Open **Settings** (the gear in the header) → **Voice** and pick an engine:
+  *Built-in* (your device's voices), *Web voices* (the Kokoro-82M neural model running inside the
+  browser after a one-time ~92 MB download, nothing installed), or *On this computer* (run
+  `uv run scripts/voice-server.py`, or `npm run voices`, and the book connects to it on
+  `127.0.0.1:3939`). Both neural engines offer the same ten voice characters, each with a preview;
+  choose one as narrator and another as tutor.
 - **Search** from the home page finds chapters and formulas by name or idea. The **Atlas** filters all 239 formulas at once.
 - **Calculators** compute the book's formulas, show the steps, and convert units
   (length, pressure, energy, temperature, molarity, and more). Chemistry calculators parse formulas like `Ca(OH)2` or `CuSO4·5H2O`.
