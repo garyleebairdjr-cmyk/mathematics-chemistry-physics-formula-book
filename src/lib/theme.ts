@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { syncStatusBar } from "@/lib/native";
 
 export type ThemePref = "light" | "dark" | "system";
 export type Ink = "amber" | "sky" | "sage" | "violet";
@@ -50,6 +51,7 @@ function apply(pref: ThemePref, ink: Ink) {
   for (const meta of document.querySelectorAll('meta[name="theme-color"]')) {
     meta.setAttribute("content", THEME_COLOR[resolved]);
   }
+  syncStatusBar(resolved);
 }
 
 /** Keep <html> in sync with the saved appearance, and follow the system when asked. */

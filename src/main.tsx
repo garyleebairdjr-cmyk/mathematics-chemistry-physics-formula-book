@@ -3,7 +3,10 @@ import { createRoot } from "react-dom/client";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
 import { AppErrorComponent, NotFound } from "@/lib/error-component";
+import { startNativeShell } from "@/lib/native";
 import "./styles.css";
+
+startNativeShell();
 
 const router = createRouter({
   routeTree,

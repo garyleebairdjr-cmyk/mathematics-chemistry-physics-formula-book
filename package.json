@@ -1,7 +1,7 @@
 {
   "name": "mathematics-chemistry-physics-formula-book",
   "version": "1.0.0",
-  "description": "An open, free field book of mathematics from arithmetic to the frontier, with the formulas of physics, chemistry, and biology \u2014 plus interactive calculators.",
+  "description": "An open, free field book of mathematics from arithmetic to the frontier, with the formulas of physics, chemistry, and biology — plus interactive calculators.",
   "license": "MIT",
   "private": true,
   "type": "module",
@@ -20,6 +20,10 @@
     "voices": "uv run scripts/voice-server.py"
   },
   "dependencies": {
+    "@capacitor/app": "^8.1.2",
+    "@capacitor/core": "^8.6.3",
+    "@capacitor/splash-screen": "^8.0.2",
+    "@capacitor/status-bar": "^8.0.4",
     "@tanstack/react-router": "^1.170.0",
     "katex": "^0.16.22",
     "lucide-react": "^0.510.0",
@@ -28,6 +32,10 @@
     "zustand": "^5.0.0"
   },
   "devDependencies": {
+    "@capacitor/android": "^8.6.3",
+    "@capacitor/assets": "^4.0.0",
+    "@capacitor/cli": "^8.6.3",
+    "@capacitor/ios": "^8.6.3",
     "@eslint/js": "^9.20.0",
     "@tailwindcss/vite": "^4.1.0",
     "@tanstack/router-plugin": "^1.168.0",

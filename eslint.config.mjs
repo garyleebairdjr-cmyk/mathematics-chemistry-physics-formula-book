@@ -8,7 +8,7 @@ import tseslint from "typescript-eslint";
 /** Flat ESLint config. */
 export default tseslint.config(
   {
-    ignores: ["dist/**", "node_modules/**", "src/routeTree.gen.ts"],
+    ignores: ["dist/**", "node_modules/**", "src/routeTree.gen.ts", "android/**", "ios/**"],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
